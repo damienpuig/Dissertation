@@ -20,4 +20,4 @@ def echo(ws):
 def send(ws):
 	ws.send("go damien")	
 
-run(host='127.0.0.1', port=8080, server=GeventWebSocketServer)
+run(host='127.0.0.1', port=8000, server=GeventWebSocketServer)

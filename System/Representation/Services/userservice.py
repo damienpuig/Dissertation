@@ -1,31 +1,50 @@
 from mongoengine import *
 from Objects.user import User
-from Services.servicebase import ServiceBase
+from Services.servicebase import ServiceBase, Result
 
 class UserService(ServiceBase):
-	def getUserByEmail(self, email):
-		current = User.objects(email=email).first()
-		self.logIt("getuserbyemail performed", current.email)
+
+	def __init__(self, instancename):
+		ServiceBase.__init__(self, instancename)
+
+	def getbyemail(self, email):
+		query = lambda x:User.objects(email=x).first()
+		current = Result().safe_execute(query,email)
+
+		if current.isvalid:
+			self.logit("getbyemail performed", current.result.email)
+		else:
+			self.logit("getbyemail performed", "user not found")
 		return current
 
-	def getUserById(self, id):
-		current = User.objects(_id=id).first()
-		self.logIt("getUserById performed", current.email)
+	def getbyid(self, id):
+		query = lambda x:User.objects(_id=x).first()
+		current = Result().safe_execute(query, id)
+
+		if current.isvalid:
+			self.logit("getbyid performed", current.result.email)
+		else:
+			self.logit("getbyid performed", "user not found")
+
 		return current
 
-	def addUser(self, email, password):
-		newuser = User(email=email, password=password)
+	def add(self, email):
+		newuser = User(email=email)
 		newuser.save()
-		self.logIt("addUser performed", newuser.email)
+		self.logit("add performed", newuser.email)
 		return newuser
 
-	def removeUserById(self, id):
+	def delete(self, id):
 		current = getUserById(id)
-		current.delete()
-		self.logIt("removeUserById performed", current.email + " has been deleted")
-		pass
 
-	def removeAllUsers(self):
+		if current.isvalid:
+			current.result.delete()
+			self.logit("delete performed", current.result.email + " has been deleted")
+		else:
+			self.logit("delete performed", "user not found for deletion")
+		
+
+	def deleteall(self):
 		User.drop_collection()
-		self.logIt("removeAllUsers performed", " User collection has been deleted")
-		pass
+		self.logit("deleteall performed", " User collection has been deleted")
+		

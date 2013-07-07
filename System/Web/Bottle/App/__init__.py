@@ -2,13 +2,14 @@
 __version__ = '0.1'
 from bottle import Bottle, TEMPLATE_PATH, request, route, hook
 from beaker.middleware import SessionMiddleware
+import redis
 
 session_opts = {
-    'session.type': 'file',
-    'session.cookie_expires': 300,
-    'session.data_dir': './data',
-    'session.auto': True
+    'beaker.session.type': 'redis',
+	'beaker.session.url': 'localhost:6379',
+	'beaker.session.auto': True
 }
+redis = redis.Redis(host='localhost', port=6379, db=0)
 app = SessionMiddleware(Bottle(), session_opts)
 TEMPLATE_PATH.append("./App/views/")
 TEMPLATE_PATH.remove("./views/")
