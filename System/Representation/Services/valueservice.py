@@ -15,21 +15,31 @@ class ValueService(ServiceBase):
 				builder.limit(l)
 			return builder.all()
 
-		current = Result().safe_execute(query, device, limit)
-		return current
+		result = Result().safe_execute(query, device, limit)
+		return result
 
 	def getbydeviceandtime(self, device, limit, date):
-		query = Value.objects.filter((Q(device=device) & Q(date__gte=date)))
-		
-		if not (limit is None):
-			query.limit(limit)
+		def query(d, date, l):
+			builder = Value.objects.filter((Q(device=d) & Q(date__gte=date)))
+			if not (limit is None):
+				builder.limit(l)
+			return builder.all()
 
-		values = query.all()
-		return values
+		result = Result().safe_execute(query, device, date, limit)
+		return result
 
-	def createorupdate(self, value):
-		value.save()
-		return value
+	def addvalue(self, device, valuetype, value, comment):
+		newvalue = Value(valueType=valuetype, value=value)
+
+		if not (comment is None):
+			newvalue.comments = [comment]
+
+		newvalue.save()
+		device.update(add_to_set__values=[newvalue])
+		return device
+
+	
+
 
 	def delete(self, value):
 		value.delete()

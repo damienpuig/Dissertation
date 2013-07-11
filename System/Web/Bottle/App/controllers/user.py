@@ -13,18 +13,20 @@ log_s = ServiceBase('ServiceBase')
 @app.wrap_app.route('/me', method='GET')
 @authenticated
 def me():
-    print 'me'
-    return template('user/me', message="ME BUT PAGE NOT DONE")
+    email = request.environ["beaker.session"]['email']
+    currentuser = user_s.getbyemail(email)
+
+    return template('user/me', message="this is the me page", user=currentuser.result)
 
 @app.wrap_app.route('/new', method=['GET', 'POST'])
 def new():
     if request.method == 'POST':
-        enteredemail = request.forms.get('email')
-        newuser = user_s.add(enteredemail)
+        newemail = request.forms.get('email')
+        currentuser = user_s.add(newemail)
 
-        request.environ["beaker.session"]['email'] = newuser.email
-        #redis.set(newuser.email, request.environ["beaker.session"])
-        return template('home/index', message=newuser.email)
+        request.environ["beaker.session"]['email'] = currentuser.email
+        return template('home/index', message=currentuser.email)
+
     return template('user/new', message='')
 
 
@@ -32,11 +34,10 @@ def new():
 def login():
     if request.method == 'POST':
         email = request.forms.get('email')
-        loggeduser = user_s.getbyemail(email)
+        currentuser = user_s.getbyemail(email)
 
-        if loggeduser is not None:
-            request.environ["beaker.session"]['email'] = loggeduser.result.email
-            print request.environ["beaker.session"]['email']
+        if not (currentuser is None):
+            request.environ["beaker.session"]['email'] = currentuser.result.email
             redirect('/me')
 
     return template('user/login', message='')

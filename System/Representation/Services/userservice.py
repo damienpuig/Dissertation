@@ -9,24 +9,23 @@ class UserService(ServiceBase):
 
 	def getbyemail(self, email):
 		query = lambda x:User.objects(email=x).first()
-		current = Result().safe_execute(query,email)
+		result = Result().safe_execute(query,email)
 
-		if current.isvalid:
-			self.logit("getbyemail performed", current.result.email)
+		if result.isvalid:
+			self.logit("getbyemail performed", result.result.email)
 		else:
 			self.logit("getbyemail performed", "user not found")
-		return current
+		return result
 
 	def getbyid(self, id):
 		query = lambda x:User.objects(_id=x).first()
-		current = Result().safe_execute(query, id)
+		result = Result().safe_execute(query, id)
 
-		if current.isvalid:
-			self.logit("getbyid performed", current.result.email)
+		if result.isvalid:
+			self.logit("getbyid performed", result.result.email)
 		else:
 			self.logit("getbyid performed", "user not found")
-
-		return current
+		return result
 
 	def add(self, email):
 		newuser = User(email=email)
@@ -35,11 +34,11 @@ class UserService(ServiceBase):
 		return newuser
 
 	def delete(self, id):
-		current = getUserById(id)
+		result = getUserById(id)
 
-		if current.isvalid:
-			current.result.delete()
-			self.logit("delete performed", current.result.email + " has been deleted")
+		if result.isvalid:
+			result.result.delete()
+			self.logit("delete performed", result.result.email + " has been deleted")
 		else:
 			self.logit("delete performed", "user not found for deletion")
 		

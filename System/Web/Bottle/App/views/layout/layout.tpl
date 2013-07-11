@@ -24,7 +24,7 @@
   <div class="row">
     <div class="large-12 columns">
       <div class="panel">
-        <h1>context-aware application</h1>
+        <h1><a href="/">context-aware application</a></h1>
       </div>
     % if message is not '':
       <div data-alert class="alert-box secondary">

@@ -10,8 +10,8 @@ instance = None
 class Listener(object):
 
 	def initRedis(self):
-		self.channel = 'Arduino1'
-		self.channel2 = 'system/arduinogathering/command'
+		self.channel = 'sensors.*'
+		self.channel2 = 'system.arduinogathering.command'
 		self.redisinstance = redis.Redis(host='localhost', port=6379)
 		self.redisps = self.redisinstance.pubsub()
 		self.redisps.subscribe(self.channel)

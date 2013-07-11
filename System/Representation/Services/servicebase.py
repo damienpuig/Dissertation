@@ -8,9 +8,11 @@ class ServiceBase():
 	def logit(self, content, details):
 		newLog = Log(logType="SYSTEM", content=content + 'from ' + self.instancename, details=details)
 		newLog.save()
+		return newLog
 
 	def last(self):
-		return Log.objects[:1].order_by('-date').first()
+		query = lambda:Log.objects[:1].order_by('-date').first()
+		return Result().safe_execute(query)
 
 
 class Result():

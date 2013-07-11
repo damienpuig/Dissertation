@@ -31,7 +31,7 @@
     </script>
 </head>
 <body>
-    <h2>Bottle Websockets!</h2>
+    <h2>Bottle Websockets for context-aware applications!</h2>
     <div id="messages"></div>
 </body>
 </html>

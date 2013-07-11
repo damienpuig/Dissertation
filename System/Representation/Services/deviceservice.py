@@ -48,13 +48,3 @@ class DeviceService(ServiceBase):
 	def update(self, device):
 		device.save()
 		self.logit("updateDevice performed", " Updated on " + device.name)
-
-	def addvalue(self, device, valuetype, value, comment):
-		newvalue = Value(valueType=valuetype, value=value)
-
-		if not (comment is None):
-			newvalue.comments = [comment]
-
-		newvalue.save()
-		device.update(add_to_set__values=[newvalue])
-		return device

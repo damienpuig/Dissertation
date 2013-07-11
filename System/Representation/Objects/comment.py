@@ -4,5 +4,5 @@ import datetime
 
 class Comment(EmbeddedDocument):
     content = StringField()
-    author = ReferenceField(User)
+    author = EmailField(required=True)
     date = DateTimeField(default=datetime.datetime.now)
