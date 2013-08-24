@@ -28,7 +28,7 @@ class ValueService(ServiceBase):
 		result = Result().safe_execute(query, device, date, limit)
 		return result
 
-	def addvalue(self, device, valuetype, value, comment):
+	def add(self, device, valuetype, value, comment):
 		newvalue = Value(valueType=valuetype, value=value)
 
 		if not (comment is None):

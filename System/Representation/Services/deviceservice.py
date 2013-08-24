@@ -19,7 +19,7 @@ class DeviceService(ServiceBase):
 		return currents
 
 	def getbyname(self, name):
-		current = Device.objects(name=name).exclude("values").first()
+		current = Device.objects(name=str(name)).exclude("values").first()
 		#self.logit("getDeviceByName performed", " Found " + current.name)
 		return current
 

@@ -18,8 +18,8 @@ comment_s = CommentService('CommentService')
 @app.wrap_app.route('/', method='GET')
 @authenticated
 def index():
-	device12comments()
-	device21comment()
+	#device12comments()
+	#device21comment()
 	log = log_s.last()
 	return template('home/index', message=log.result.content + " :" + log.result.details)
 
@@ -34,7 +34,7 @@ def device12comments():
 	else:
 		print("DEVICE " + device.result.name + " ALREADY ON MONGODB")
 
-	value = value_s.addvalue(device, 'lum', 40.1, None)
+	value = value_s.add(device, 'lum', 40.1, None)
 
 	comment1 = Comment(content='pas mal cette value1!', author=user.result.email)
 	comment2 = Comment(content='pas mal cette value2!', author=user.result.email)

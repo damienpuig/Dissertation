@@ -10,7 +10,7 @@ instance = None
 class Listener(object):
 
 	def initRedis(self):
-		self.channel = 'sensors.*'
+		self.channel = 'sensors.arduino1'
 		self.channel2 = 'system.arduinogathering.command'
 		self.redisinstance = redis.Redis(host='localhost', port=6379)
 		self.redisps = self.redisinstance.pubsub()
@@ -31,28 +31,38 @@ class Listener(object):
 	def listen(self):
 		while True:
 			print 'Checking Redis on ' + self.channel
-			datarcvd = 0
+			#datarcvd = 0
 			for message in self.redisps.listen():
 				print message
-				datarcvd += 1
-				if datarcvd == 10:
-					print 'PUBLISHING STOP'
-					self.redisinstance.publish(self.channel2, 'stop')
-				print 'Receiving..'
-
-				self.checkchannel(message)
-
-				if message.has_key('data'):
+				# datarcvd += 1
+				# if datarcvd == 10:
+				# 	print 'PUBLISHING STOP'
+				# 	self.redisinstance.publish(self.channel2, 'stop')
+				# print 'Receiving..'
+				
+				if self.checkchannels(message):
 					self.processentry(message['data'])
+
 
 			time.sleep(1)
 
-	def checkchannel(self, data):
-		print('checking on ' + data['channel'])
-		if data['channel'] == self.channel2:
+	def checkchannels(self, data):
+		currentchannel = data['channel']
+		print('checking on ' + currentchannel)
+
+		if currentchannel == self.channel:
+			return True
+
+		elif currentchannel == self.channel2:
 			if data['data'] in self.commands:
 				print('Command found: ' + data['data'])
 				self.commands[data['data']]()
+				return False
+		else:
+			return False
+
+
+
 
 	def processentry(self, entry):
 
@@ -60,24 +70,24 @@ class Listener(object):
 		try:
 			result = json.loads(entry)
 			namedevice = result['nodeId']
+
 			device = self.device_s.getbyname(name=namedevice)
 
 			print type(device)
 
-			#if device is None:
-				#print 'New device'
-				#device = self.device_s.add(result['nodeId'].__str__(), 'this is the node number 1', [40, 30])
+			if device is None:
+				print 'New device'
+				device = self.device_s.add(result['nodeId'].__str__(), 'this is the node number ' + namedevice, [40, 30])
 
-			#self.device_s.addvalue(device, result['type'], result['value'], None)
+			self.value_s.add(device, result['type'], result['value'], None)
 
 		except Exception, e:
 			print e
-		pass
 
 
 
 if __name__ == '__main__':
-	sys.path.append(os.path.realpath('..\Representation'))
+	sys.path.append(os.path.realpath('d:\GitHub\Dissertation\System\Representation'))
 	print sys.path
 	from Services.deviceservice import DeviceService
 	from Services.valueservice import ValueService
