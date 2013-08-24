@@ -87,7 +87,8 @@ class Listener(object):
 
 
 if __name__ == '__main__':
-	sys.path.append(os.path.realpath('d:\GitHub\Dissertation\System\Representation'))
+	sys.path.append(os.path.join(os.path.dirname(__file__), '..\Representation'))
+	
 	print sys.path
 	from Services.deviceservice import DeviceService
 	from Services.valueservice import ValueService
