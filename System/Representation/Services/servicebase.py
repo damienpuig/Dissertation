@@ -1,4 +1,5 @@
 from mongoengine import *
+from Objects.result import Result
 from Objects.log import Log
 
 class ServiceBase():
@@ -6,33 +7,10 @@ class ServiceBase():
 		self.instancename = instancename
 
 	def logit(self, content, details):
-		newLog = Log(logType="SYSTEM", content=content + 'from ' + self.instancename, details=details)
+		newLog = Log(logType="SYSTEM", content=content + " from " + self.instancename, details=str(details))
 		newLog.save()
 		return newLog
 
 	def last(self):
 		query = lambda:Log.objects[:1].order_by('-date').first()
 		return Result().safe_execute(query)
-
-
-class Result():
-	def __init__(self):
-		self.error = None
-		self.result = None
-		self.isvalid = None
-
-	def safe_execute(self, func, *args):
-		print 'try execute'
-		try:
-			self.result = func(*args)
-			self.isvalid = True
-			print 'try successfully executed'
-		except Exception, e:
-			self.isvalid = False
-			self.error = e
-			print 'except executed'
-			print self.error
-		finally:
-			return self
-
-

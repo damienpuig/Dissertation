@@ -14,18 +14,21 @@ user_s = UserService('UserService')
 log_s = ServiceBase('ServiceBase')
 device_s = DeviceService('DeviceService')
 comment_s = CommentService('CommentService')
+value_s = ValueService('ValueService')
 
 @app.wrap_app.route('/', method='GET')
 @authenticated
 def index():
 	#device12comments()
 	#device21comment()
+	comments('arduino1')
 	log = log_s.last()
 	return template('home/index', message=log.result.content + " :" + log.result.details)
 
 
 
 def device12comments():
+	user = user_s.getbyemail('damien.puig@gmail.com')
 	device = device_s.getbyname(name='arduino1')
 
 	if device is None:
@@ -39,9 +42,30 @@ def device12comments():
 	comment1 = Comment(content='pas mal cette value1!', author=user.result.email)
 	comment2 = Comment(content='pas mal cette value2!', author=user.result.email)
 	
+	comment_s.adds(value.result, [comment1, comment2])
+
+def comments(arduinoname):
+	user = user_s.getbyemail('damien.puig@gmail.com')
+	device = device_s.getbyname(name=arduinoname)
+
+	value = value_s.getbydevice(device.result, 1)
+
+	print(str(value))
+
+	for value in value.result.values:
+		print(str(value))
+
+	comment1 = Comment(content='pas mal cette value1!', author=user.result.email)
+	comment2 = Comment(content='pas mal cette value2!', author=user.result.email)
+	
+	print(str(comment1))
+
+	print(str(comment2))
+
 	comment_s.adds(value, [comment1, comment2])
 
 def device21comment():
+	user = user_s.getbyemail('damien.puig@gmail.com')
 	device = device_s.getbyname(name='arduino2')
 
 	if device is None:
@@ -54,7 +78,7 @@ def device21comment():
 
 	comment1 = Comment(content='pas mal cette value1!', author=user.result.email)
 
-	comment_s.add(value, comment1)
+	comment_s.add(value.result, comment1)
 
 def newuser():
 	user = user_s.getbyemail('damien.puig@gmail.com')
