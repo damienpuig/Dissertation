@@ -65,10 +65,18 @@
   ('__proto__' in {} ? 'zepto' : 'jquery') +
   '.js><\/script>')
   </script>
-  <script src="/js/foundation.min.js"></script>
+  <script type="text/javascript" src="/js/jquery-2.0.3.min.js"></script>
+  <script type='text/javascript' src="/js/foundation.min.js"></script>
+  <script type='text/javascript' src="/js/knockout-2.3.0.js"></script>
+
   <script>
     $(document).foundation();
   </script>
+
+  %if defined('js'):
+    %js()
+
+
 
 </body>
 </html>

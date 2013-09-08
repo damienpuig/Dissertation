@@ -19,7 +19,7 @@ class UserService(ServiceBase):
 		return result
 
 	def getbyid(self, id):
-		query = lambda x:User.objects(_id=x).first()
+		query = lambda x:User.objects(id=x).first()
 		result = Result().safe_execute(query, id)
 
 		if result.isvalid:

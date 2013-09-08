@@ -14,6 +14,5 @@ redis = redis.Redis(host='localhost', port=6379, db=0)
 app = SessionMiddleware(Bottle(), session_opts)
 TEMPLATE_PATH.insert(0, os.path.join(os.path.dirname(__file__), 'views'))
 TEMPLATE_PATH.remove("./views/")
-print TEMPLATE_PATH
 
 from App.controllers import *

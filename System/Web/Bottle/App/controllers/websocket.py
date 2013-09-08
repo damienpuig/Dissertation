@@ -14,6 +14,4 @@ def echo(ws):
         send(ws)
 
 def send(ws):
-	ws.send("socket ready to push data to client")	
-
-run(host='127.0.0.1', port=8000, server=GeventWebSocketServer)
+	ws.send("socket ready to push data to client")

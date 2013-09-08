@@ -16,7 +16,7 @@ class Pusher(object):
 		while self.check:
 
 			self.value = random.randint(100, 1000)
-			self.message = "{ \"nodeId\": arduino1, \"type\": \"Luminosity\", \"value\": " + str(self.value) + " }"
+			self.message = "{ \"nodeId\": \"arduino1\", \"type\": \"Luminosity\", \"value\": " + str(self.value) + " }"
 
 			print 'Pushing to redis on ' + self.channel
 

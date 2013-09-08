@@ -52,9 +52,6 @@ def comments(arduinoname):
 
 	print(str(value))
 
-	for value in value.result.values:
-		print(str(value))
-
 	comment1 = Comment(content='pas mal cette value1!', author=user.result.email)
 	comment2 = Comment(content='pas mal cette value2!', author=user.result.email)
 	
@@ -62,7 +59,7 @@ def comments(arduinoname):
 
 	print(str(comment2))
 
-	comment_s.adds(value, [comment1, comment2])
+	#comment_s.adds(value, [comment1, comment2])
 
 def device21comment():
 	user = user_s.getbyemail('damien.puig@gmail.com')

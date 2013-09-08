@@ -9,17 +9,29 @@ class ValueService(ServiceBase):
 	def __init__(self, instancename):
 		ServiceBase.__init__(self, instancename)
 
+	def getbyid(self, id):
+		query = lambda x:Value.objects(id=x).first()
+
+		result = Result().safe_execute(query, id)
+
+		if result.isvalid:
+			self.logit("getbyid performed", str(result.result))
+		else:
+			self.logit("getbyid performed with error", result.error)
+		return result
+
 	def getbydevice(self, device, limit):
-		query = lambda i:Device.objects.get(id=i)
+		query = lambda i:Device.objects.get(id=i).values
 
 		result = Result().safe_execute(query, device.id)
 
 		if result.isvalid:
-			if not (limit is None) and result.result.values:
-				result = result.result.values[:limit]
-			self.logit("getbydevice performed", "{0} entries found".format(len(result.result.values)))
+			if not (limit is None) and result.result:
+				result.result = result.result[:limit]
+			self.logit("getbydevice performed", "{0} entry(ies) found".format(len(result.result)))
 		else:
 			self.logit("getbydevice performed with error", result.error)
+
 		return result
 
 	def getbytime(self, limit, date):
@@ -27,12 +39,12 @@ class ValueService(ServiceBase):
 			builder = Value.objects.filter(Q(date__gte=date))
 			if not (limit is None):
 				builder.limit(l)
-			return builder.all()
+			return builder
 
 		result = Result().safe_execute(query, date, limit)
 
 		if result.isvalid:
-			self.logit("getbytime performed", "{0} entries found".format(len(result.result.values)))
+			self.logit("getbytime performed", "{0} entry(ies) found".format(len(result.result)))
 		else:
 			self.logit("getbytime performed with error", result.error)
 		return result
@@ -62,7 +74,7 @@ class ValueService(ServiceBase):
 		lenght = len(device.values)
 		device.values = None
 		device.save()
-		self.logit("deleteallbydevice performed", "device: {0}, entries:{1}".format(str(device), lenght))
+		self.logit("deleteallbydevice performed", "device: {0}, entry(ies):{1}".format(str(device), lenght))
 		return device
 
 	def deleteall(self):

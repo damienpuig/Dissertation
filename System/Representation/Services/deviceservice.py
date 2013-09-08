@@ -14,7 +14,7 @@ class DeviceService(ServiceBase):
 		result = Result().safe_execute(query)
 
 		if result.isvalid:
-			self.logit("getall performed", "{0} entries found".format(len(result.result)))
+			self.logit("getall performed", "{0} entry(ies) found".format(len(result.result)))
 		else:
 			self.logit("getall performed with error", result.error)
 		return result
@@ -29,7 +29,7 @@ class DeviceService(ServiceBase):
 		result = Result().safe_execute(query, locationTuple, limit)
 
 		if result.isvalid:
-			self.logit("getbylocation performed", "{0} entries found".format(len(result.result)))
+			self.logit("getbylocation performed", "{0} entry(ies) found".format(len(result.result)))
 		else:
 			self.logit("getbylocation performed with error", result.error)
 		return result
@@ -55,6 +55,20 @@ class DeviceService(ServiceBase):
 		else:
 			self.logit("getbyid performed with error", result.error)
 		return result
+
+	def getbyvalue(self, value):
+
+		query = lambda v:Device.objects(values__in=[v]).first()
+
+		result = Result().safe_execute(query, value)
+
+		if result.isvalid:
+			self.logit("getbyvalue performed", str(result.result))
+		else:
+			self.logit("getbyvalue performed with error", result.error)
+		return result
+
+
 
 	def add(self, name, description, location):
 		newDevice = Device(name=name, description=description, location=location)

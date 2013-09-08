@@ -66,20 +66,21 @@ class Listener(object):
 
 	def processentry(self, entry):
 
-		print('Entry found: ' + entry.__str__())
+		print('Entry found: ' + str(entry))
 		try:
+			print entry
 			result = json.loads(entry)
 			namedevice = result['nodeId']
 
 			device = self.device_s.getbyname(name=namedevice)
 
-			print type(device)
+			print str(device.result)
 
 			if device is None:
 				print 'New device'
-				device = self.device_s.add(result['nodeId'].__str__(), 'this is the node number ' + namedevice, [40, 30])
+				device = self.device_s.add(namedevice, 'this is the node ' + namedevice, [40, 30])
 
-			self.value_s.add(device, result['type'], result['value'], None)
+			self.value_s.add(device.result, result['type'], result['value'], None)
 
 		except Exception, e:
 			print e

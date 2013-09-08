@@ -12,12 +12,12 @@
             {{value.value}}
           </p>
           <ul class="inline-list">
-            <li><a href="arduino/index?name=" + >Check arduino</a>
+            <li><a href="/arduino?value={{value.id}}" >Check arduino</a>
             </li>
           </ul>
 
           %if value.comments :
-            <h6>len(value.comments) Comments</h6>
+            <h6>{{len(value.comments)}} Comments</h6>
 
             %for comment in value.comments:
               <div class="row">
