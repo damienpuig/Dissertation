@@ -20,4 +20,3 @@ TEMPLATE_PATH.insert(0, os.path.join(os.path.dirname(__file__), 'views'))
 TEMPLATE_PATH.remove("./views/")
 
 from App.controllers import *
-app.wrap_app.error_handler = error.handler

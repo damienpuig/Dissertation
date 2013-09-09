@@ -57,7 +57,17 @@
         </div>
       </div>
     </div>
-      <a href="#" id="update" data-bind='click: update' class="small button">Update</a>
+    <div id="channelcontainer" style="display: none;">
+      <h5 class="subheader">Channel(s) for SC</h5>
+      <div class="row collapse">
+                  <div class="small-12 columns">
+                    <select type="text" data-bind="options: channels,
+                    value: selectedchannel, optionsCaption: 'Choose...'">
+                  </select>
+                  </div>
+      </div>
+    </div>
+      <a href="#" id="connect" data-bind='click: connect' class="small button">Update</a>
       <a href="#" id="stop" data-bind='click: stop' class="small button">Cancel</a>
     </div>
 

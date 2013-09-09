@@ -3,12 +3,8 @@ from bottle.ext.websocket import GeventWebSocketServer
 from bottle.ext.websocket import websocket
 import time
 
-@get('/')
-def index():
-    return template('index')
-
-@get('/websocket', apply=[websocket])
-def echo(ws):
+@get('/connect', apply=[websocket])
+def connect(ws):
     while True:
         time.sleep(5)
         send(ws)

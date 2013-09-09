@@ -1,5 +1,3 @@
- //lpc = long polling connection
-  //sc = socket connection
 function Panel(){
 
   var self = this
@@ -7,18 +5,20 @@ function Panel(){
   this.socketaction = null
 
 
-  this.init= function(){
-  self.panelViewModel = new this.panelViewModel(connection.longPolling, 5)
+  this.init = function(){
+  self.panelViewModel = new this.panelViewModel(connection.longPolling, 5, ["sensors.*","sensors.arduino1"])
   ko.applyBindings(self.panelViewModel)
   }
 
-  this.panelViewModel = function (type, time){
+  this.panelViewModel = function (type, time, channels){
   this.last = null
   this.connectionType= ko.observable([type])
-  this.seconds= ko.observable(time).extend({ numeric: 0 });
-  this.update= function(){
+  this.seconds= ko.observable(time).extend({ numeric: 0 })
+  this.channels = ko.observableArray(channels)
+  this.selectedchannel = ko.observable()
+  this.connect = function(){
 
-      $('#update').attr('disabled','disabled')
+      $('#connect').attr('disabled','disabled')
 
 
       if(this.connectionType() === connection.longPolling && this.seconds() > 0){
@@ -27,51 +27,43 @@ function Panel(){
       }
       else if(this.connectionType() === connection.socket ){
        self.socketaction = self.socketify()
-      }
-    }
+      }}
   this.stop = function(){
     self.clearwork()
-    $('#update').removeAttr('disabled','disabled')
-  }
+    $('#connect').removeAttr('disabled','disabled')}}
 
-  }
-
-  this.clearwork = function(){
+this.clearwork = function(){
     if(self.lpaction != null) clearInterval(self.lpaction)
 
     if(self.socketaction != null) self.socketaction.close()
 
     self.lpaction = null
-    self.socketaction = null
-  }
+    self.socketaction = null}
 
-  this.socketify = function(){
+this.socketify = function(){
 
     if (!window.WebSocket) {
                 if (window.MozWebSocket) {
                     window.WebSocket = window.MozWebSocket;
                 } else {
                     $('#valuecontainer').prepend("<li>Your browser doesn't support WebSockets.</li>")
-                }
-            }
+                }}
 
-            ws = new WebSocket('ws://127.0.0.1:8000/websocket')
+    ws = new WebSocket('ws://127.0.0.1:8000/connect')
 
-            ws.onopen = function(evt) {
-              alert("connection opened")
-            }
+    ws.onopen = function(evt) {
+      alert("connection opened")
+    }
 
-            ws.onmessage = function(evt) {
-                this.render(evt.data)
-            }
+    ws.onmessage = function(evt) {
+      this.render(evt.data)
+    }
 
-            ws.onclose = function(evt) {
-                 alert("connection closed")
-            }
+    ws.onclose = function(evt) {
+      alert("connection closed")
+    }}
 
-        }
-
-this.poll= function(timeout){
+this.poll = function(timeout){
 
   var el = self.loader()
 
@@ -79,7 +71,6 @@ this.poll= function(timeout){
   var data = {"date": self.panelViewModel.last}
 
    if(null === self.panelViewModel.last) data = null
-
 
     $.ajax({
       url: '/panel/lpupdate',
@@ -90,34 +81,25 @@ this.poll= function(timeout){
       timeout: timeout,
       cache:false,
       async: true,
-      beforeSend: function () {
-               el.show()
-            },
-      success: function(data)
-      {
+      beforeSend: function (){el.show()},
+      success: function(data){
           el[0].innerHTML= "Success! "
 
           if(data.hasOwnProperty('data')) 
             self.render(data.data)
 
           el[0].innerHTML = el[0].innerHTML + data.count + " new value(s)"
-
-          self.panelViewModel.last = data.last
-      },
+          self.panelViewModel.last = data.last},
       error: function (xhr, textStatus, errorThrown) {
         setTimeout(function(){ 
         el[0].innerHTML= "Error!"
-        }, 1000)
-      }
-    })
-  }
+        }, 1000)}})}
 
 this.render = function(result){
      $('#valuecontainer')
      .prepend(result)
      .css({'opacity':0})
-     .animate({'opacity':1})
-  }
+     .animate({'opacity':1})}
 
 this.loader = function() {
     var el = $('#load')
@@ -129,10 +111,7 @@ this.loader = function() {
 
    el.html("<center><img src=\"/images/ajax-loader.gif\"></center>")
 
-   return $('#load')
-}
-
-}
+   return $('#load')}}
 
 $(document).ready(function () {
 
@@ -142,9 +121,9 @@ $(document).ready(function () {
     },
     update: function(element, valueAccessor) {
       var value = valueAccessor()()
-        connection.longPolling == valueAccessor()() ? $(element).fadeIn() : $(element).fadeOut()
-    }
-  }
+      var elchannel = $('#channelcontainer')
+        connection.longPolling == valueAccessor()() ? elchannel.fadeOut(200, function(){ $(element).fadeIn()}) : $(element).fadeOut(200, function(){ elchannel.fadeIn()})
+    }}
 
   ko.extenders.numeric = function(target, precision) {
     //create a writeable computed observable to intercept writes to our observable
@@ -165,17 +144,16 @@ $(document).ready(function () {
                     target.notifySubscribers(valueToWrite);
                 }
             }
-        }
-    });
+        }});
  
     //initialize with current value to make sure it is rounded appropriately
     result(target());
  
     //return the new computed observable
-    return result;
-};
+    return result;};
 
-
+ //lpc = long polling connection
+  //sc = socket connection
   connection = {
   longPolling: "lpc",
   socket: "sc"
