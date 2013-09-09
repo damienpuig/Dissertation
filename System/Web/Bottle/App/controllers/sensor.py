@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from App import app, redis
-import datetime
-import json
+from datetime import datetime
+import json, time
 from Services.userservice import UserService
 from Services.servicebase import ServiceBase
 from Services.deviceservice import DeviceService
@@ -21,7 +21,7 @@ def panel():
 	email = request.environ["beaker.session"]['email']
 	currentuser = user_s.getbyemail(email)
 
-	now = datetime.datetime.today()
+	now = datetime.today()
 	values = value_s.getbytime(10, now.replace(day=now.day-3))
 
 	print values
@@ -33,16 +33,19 @@ def panel():
 @authenticated
 def panel():
 
-	date = request.query.get("date")
-
-	if not (date is None):
-		now = datetime.datetime.today()
+	if not request.query.date:
+		now = datetime.today()
 		date = now.replace(hour=now.hour-1)
-
+	else:
+		fmt = '%Y-%d-%mT%H:%M:%S'
+		parts = request.query.date.split('.')
+		date = datetime.strptime(parts[0], fmt)
+		date = date.replace(microsecond=int(parts[1])+1)
 
 	values = value_s.getbytime(10, date)
 
 	response.content_type = 'application/json'
+
 
 	def preparehtml(values):
 		sb = []
@@ -50,20 +53,29 @@ def panel():
 			sb.append(template('template/value', value=value))
 		return ''.join(sb)
 
-	return { "success" : True, "data" : preparehtml(values.result), "last": values.result[0].date.isoformat()}
+	if not values.result:
+		return {
+		"success" : True, 
+		"count": values.result.count(),
+		"last": date.isoformat()
+		}
+	else:
+		return { 
+		"success" : True, 
+		"data" : preparehtml(values.result),
+		"count": values.result.count(), 
+		"last": values.result[0].date.isoformat()
+		}
 
 
 
-
-@app.wrap_app.route('/arduino', method='GET')
+@app.wrap_app.route('/arduino/<relatedvalueid>', method='GET')
 @authenticated
-def arduino():
+def arduino(relatedvalueid):
 	email = request.environ["beaker.session"]['email']
 	currentuser = user_s.getbyemail(email)
 
-	proposedid = request.query['value']
-
-	value = value_s.getbyid(proposedid)
+	value = value_s.getbyid(relatedvalueid)
 
 	device = device_s.getbyvalue(value.result)
 

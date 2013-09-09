@@ -36,7 +36,7 @@ class ValueService(ServiceBase):
 
 	def getbytime(self, limit, date):
 		def query(date, l):
-			builder = Value.objects.filter(Q(date__gte=date))
+			builder = Value.objects.filter(Q(date__gt=date))
 			if not (limit is None):
 				builder.limit(l)
 			return builder

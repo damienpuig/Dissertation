@@ -7,12 +7,16 @@
             <strong>Value id:</strong>
             {{value.id}}
           </p>
+                    <p>
+            <strong>Added at:</strong>
+            {{value.date}}
+          </p>
           <p>
             <strong>Value:</strong>
             {{value.value}}
           </p>
           <ul class="inline-list">
-            <li><a href="/arduino?value={{value.id}}" >Check arduino</a>
+            <li><a href="/arduino/{{value.id}}" >Check arduino</a>
             </li>
           </ul>
 

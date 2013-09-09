@@ -50,14 +50,15 @@
       <h5 class="subheader">Time allocated for LP</h5>
       <div class="row collapse">
                   <div class="small-8 columns">
-                    <input type="text" placeholder="in seconds" data-bind="text: seconds">
+                    <input type="text" placeholder="in seconds" data-bind="value: seconds">
                   </div>
                   <div class="small-4 columns">
                     <span class="postfix">second(s)</span>
         </div>
       </div>
     </div>
-      <a href="#" data-bind='click: update' class="small button">Update</a>
+      <a href="#" id="update" data-bind='click: update' class="small button">Update</a>
+      <a href="#" id="stop" data-bind='click: stop' class="small button">Cancel</a>
     </div>
 
 %def js():
