@@ -1,4 +1,8 @@
-class Result():
+from mongoengine import *
+from Objects.mongoextension import encode_model
+import json
+
+class Result(object):
 	def __init__(self):
 		self.error = None
 		self.result = None
@@ -9,14 +13,19 @@ class Result():
 		try:
 			self.result = func(*args)
 			self.isvalid = True
-			print 'try successfully executed'
+
+			if self.result is None:
+				self.isvalid = False
+				print 'try successfully executed, but result is None'
+				return self
+
+			print 'try successfully executed with result'
+
 		except Exception, e:
+			print 'except executed'
 			self.isvalid = False
 			self.error = e
-			print 'except executed'
 			print self.error
+			
 		finally:
 			return self
-
-	def __str__(self):
-		return "{{\"error\": \"{0}\", \"result\": \"{1}\", \"isvalid\": \"{2}\"}}".format(str(self.error), str(self.result), str(self.isvalid))

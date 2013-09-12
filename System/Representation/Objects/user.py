@@ -1,8 +1,10 @@
 from mongoengine import *
+from Objects.mongoextension import encode_model
+import json
 
 class User(Document):
     email = EmailField(required=True)
 
-    def __str__(self):
-    	return "{{\"email\": \"{0}\"}}".format(self.email)
+    def tojson(self):
+    	return json.dumps(self, default=encode_model)
 

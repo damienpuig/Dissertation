@@ -1,15 +1,16 @@
 from mongoengine import *
-import datetime
+from Objects.mongoextension import encode_model
+import datetime, json
 
 class Log(Document):
     logType = StringField(max_length=120, required=True)
-    content = StringField(required=True, max_length=120)
-    details = StringField(required=True, max_length=120)
+    content = StringField(required=True)
+    details = StringField(required=True)
     date = DateTimeField(default=datetime.datetime.now)
 
     @queryset_manager
     def objects(doc_cls, queryset):
     	return queryset.order_by('-date')
 
-    def __str__(self):
-    	return "{{\"logType\": \"{0}\", \"content\": \"{1}\", \"details\": \"{2}\", \"date\": \"{3}\"}}".format(self.logType, self.content, self.details, self.date)
+    def tojson(self):
+    	return json.dumps(self, default=encode_model)

@@ -24,8 +24,6 @@ def panel():
 	now = datetime.today()
 	values = value_s.getbytime(10, now.replace(day=now.day-3))
 
-	print values
-
 	return template('sensor/panel', message="this is the arduino panel page", user=currentuser.result, values=values.result)
 
 
@@ -34,12 +32,12 @@ def panel():
 def panel():
 
 	if not request.query.date:
-		now = datetime.today()
-		date = now.replace(hour=now.hour-1)
+		date = datetime.today()
 	else:
 		fmt = '%Y-%d-%mT%H:%M:%S'
 		parts = request.query.date.split('.')
 		date = datetime.strptime(parts[0], fmt)
+		#little hack
 		date = date.replace(microsecond=int(parts[1])+1)
 
 	values = value_s.getbytime(10, date)
@@ -54,14 +52,12 @@ def panel():
 		return ''.join(sb)
 
 	if not values.result:
-		return {
-		"success" : True, 
+		return { 
 		"count": values.result.count(),
 		"last": date.isoformat()
 		}
 	else:
-		return { 
-		"success" : True, 
+		return {  
 		"data" : preparehtml(values.result),
 		"count": values.result.count(), 
 		"last": values.result[0].date.isoformat()

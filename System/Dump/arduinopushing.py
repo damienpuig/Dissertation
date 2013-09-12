@@ -1,13 +1,11 @@
-import sys, os, random
-import time
-import redis
+import sys, os, random, time, redis
 
 instance = None
 
 class Pusher(object):
 
-	def initRedis(self):
-		self.channel = 'sensors.arduino1'
+	def initRedis(self, channel):
+		self.channel = channel
 		self.redisinstance = redis.Redis(host='localhost', port=6379)
 
 	def pushforever(self):
@@ -22,15 +20,21 @@ class Pusher(object):
 
 			self.redisinstance.publish(self.channel, self.message)
 
-			time.sleep(5)
+			time.sleep(10)
 
 
 
 if __name__ == '__main__':
+	sys.path.append(os.path.join(os.path.dirname(__file__), '..\Representation'))
+	
+	from Objects.params import Params
+
 	instance = Pusher()
 	print 'System Gathering created'
 
-	instance.initRedis()
+	channel = Params.specific_channels["physical.arduino.values"].format("arduino1")
+
+	instance.initRedis(channel)
 	print 'Redis connection initialised'
 
 	instance.pushforever()

@@ -6,7 +6,7 @@ function Panel(){
 
 
   this.init = function(){
-  self.panelViewModel = new this.panelViewModel(connection.longPolling, 5, ["sensors.*","sensors.arduino1"])
+  self.panelViewModel = new this.panelViewModel(connection.longPolling, 5, ["system.arduinos.*","system.arduinos.arduino1"])
   ko.applyBindings(self.panelViewModel)
   }
 
@@ -18,27 +18,43 @@ function Panel(){
   this.selectedchannel = ko.observable()
   this.connect = function(){
 
-      $('#connect').attr('disabled','disabled')
+    if(self.socketaction != null){
+      if(self.socketaction.readyState == 3) { return }
+    }
+    else if(self.lpaction != null){ return }
 
+
+
+      $('#connect').attr('disabled','disabled')
 
       if(this.connectionType() === connection.longPolling && this.seconds() > 0){
         var timeout= self.panelViewModel.seconds() * 1000
         self.lpaction = setInterval(function() { self.poll(timeout) }, timeout)
       }
       else if(this.connectionType() === connection.socket ){
-       self.socketaction = self.socketify()
-      }}
+      self.socketify()
+      }
+    }
+    
+
   this.stop = function(){
     self.clearwork()
-    $('#connect').removeAttr('disabled','disabled')}}
+    $('#connect').removeAttr('disabled','disabled')}
+  }
+
 
 this.clearwork = function(){
-    if(self.lpaction != null) clearInterval(self.lpaction)
 
-    if(self.socketaction != null) self.socketaction.close()
+    if(self.lpaction != null){
+     clearInterval(self.lpaction)
+     self.lpaction = null
+   }
 
-    self.lpaction = null
-    self.socketaction = null}
+    if(self.socketaction.readyState == 1){ 
+      self.socketaction.send("STOP")
+      self.socketaction.close()
+    }
+  }
 
 this.socketify = function(){
 
@@ -49,23 +65,33 @@ this.socketify = function(){
                     $('#valuecontainer').prepend("<li>Your browser doesn't support WebSockets.</li>")
                 }}
 
-    ws = new WebSocket('ws://127.0.0.1:8000/connect')
+    self.socketaction = new WebSocket('ws://127.0.0.1:8000/connect')
 
-    ws.onopen = function(evt) {
-      alert("connection opened")
+    self.socketaction.onopen = function(evt) {
+      self.addLoader()
     }
 
-    ws.onmessage = function(evt) {
-      this.render(evt.data)
+    self.socketaction.onerror = function(evt) {
+      self.removeLoader()
     }
 
-    ws.onclose = function(evt) {
-      alert("connection closed")
-    }}
+
+    self.socketaction.onmessage = function(evt) {
+      self.removeLoader()
+      data = JSON.parse(evt.data)
+      self.render(data.data)
+      self.addLoader()
+    }
+
+    self.socketaction.onclose = function(evt) {
+      self.removeLoader()
+      self.socketaction.close()
+    }
+}
 
 this.poll = function(timeout){
 
-  var el = self.loader()
+  var el = self.addLoader()
 
 
   var data = {"date": self.panelViewModel.last}
@@ -96,12 +122,17 @@ this.poll = function(timeout){
         }, 1000)}})}
 
 this.render = function(result){
-     $('#valuecontainer')
-     .prepend(result)
-     .css({'opacity':0})
-     .animate({'opacity':1})}
 
-this.loader = function() {
+    var value = $(result)
+
+    value.css({'opacity':0})
+
+    $('#valuecontainer')
+     .prepend(value)
+
+    $(value).animate({'opacity':1})}
+
+this.addLoader = function() {
     var el = $('#load')
 
      if(el.length <= 0){
@@ -111,7 +142,14 @@ this.loader = function() {
 
    el.html("<center><img src=\"/images/ajax-loader.gif\"></center>")
 
-   return $('#load')}}
+   return $('#load')}
+
+this.removeLoader = function() {
+  $('#load').remove();
+ }
+}
+
+
 
 $(document).ready(function () {
 

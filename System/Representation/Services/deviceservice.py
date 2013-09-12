@@ -3,6 +3,7 @@ from Objects.device import Device
 from Objects.value import Value
 from Objects.result import Result
 from Services.servicebase import ServiceBase
+from bson.objectid import ObjectId
 
 class DeviceService(ServiceBase):
 
@@ -35,23 +36,24 @@ class DeviceService(ServiceBase):
 		return result
 
 	def getbyname(self, name):
-		query = lambda n:Device.objects(name=str(n)).exclude("values").first()
+		query = lambda n:Device.objects(name=n).exclude("values").first()
 
 		result = Result().safe_execute(query, name)
 
 		if result.isvalid:
-			self.logit("getbyname performed", str(result.result))
+			self.logit("getbyname performed", result.result.tojson())
 		else:
+			print "ahah"
 			self.logit("getbyname performed with error", result.error)
 		return result
 
 	def getbyid(self, id):
-		query = lambda i:Device.objects(id=i).exclude("values").first()
+		query = lambda i:Device.objects(id=ObjectId(i)).exclude("values").first()
 
 		result = Result().safe_execute(query, id)
 
 		if result.isvalid:
-			self.logit("getbyid performed", str(result.result))
+			self.logit("getbyid performed", result.result.tojson())
 		else:
 			self.logit("getbyid performed with error", result.error)
 		return result
@@ -63,7 +65,7 @@ class DeviceService(ServiceBase):
 		result = Result().safe_execute(query, value)
 
 		if result.isvalid:
-			self.logit("getbyvalue performed", str(result.result))
+			self.logit("getbyvalue performed", result.result.tojson())
 		else:
 			self.logit("getbyvalue performed with error", result.error)
 		return result
@@ -74,12 +76,12 @@ class DeviceService(ServiceBase):
 		newDevice = Device(name=name, description=description, location=location)
 		newDevice.save()
 
-		self.logit("add performed", "{0} has been added".format(str(newDevice)))
+		self.logit("add performed", "{0} has been added".format(newDevice.tojson()))
 		return newDevice
 
 	def delete(self, device):
 		device.delete()
-		self.logit("removeDevice performed", "{0} has been deleted".format(str(device)))
+		self.logit("removeDevice performed", "{0} has been deleted".format(device.tojson()))
 		return device
 
 	def deleteall(self):
@@ -89,4 +91,4 @@ class DeviceService(ServiceBase):
 
 	def update(self, device):
 		device.save()
-		self.logit("updateDevice performed", "{0} has been updated".format(str(device)))
+		self.logit("updateDevice performed", "{0} has been updated".format(device.tojson()))

@@ -1,6 +1,7 @@
 from mongoengine import *
 from Objects.comment import Comment
-import datetime
+from Objects.mongoextension import encode_model
+import datetime, json
 
 class Value(Document):
     valueType = StringField(max_length=120, required=True)
@@ -12,5 +13,6 @@ class Value(Document):
     def objects(doc_cls, queryset):
     	return queryset.order_by('-date')
 
-    def __str__(self):
-    	return "{{\"valueType\": \"{0}\", \"value\": \"{1}\", \"comments\": \"{2}\", \"date\": \"{3}\"}}".format(self.valueType, self.value, len(self.comments), self.date)
+
+    def tojson(self):
+        return json.dumps(self, default=encode_model)

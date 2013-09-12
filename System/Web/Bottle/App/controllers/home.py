@@ -9,7 +9,7 @@ from Objects.comment import Comment
 from base import authenticated
 from bottle import template, request, redirect
 
-# TO DO : VALUE SERVICES DANS CHAQUE METHODE
+
 user_s = UserService('UserService')
 log_s = ServiceBase('ServiceBase')
 device_s = DeviceService('DeviceService')
