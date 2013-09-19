@@ -31,9 +31,4 @@
           </div>
           </div>
         </div>
-
-<script type="text/javascript">
-
-
-</script>
 %rebase layout/layout message=message, user=user
