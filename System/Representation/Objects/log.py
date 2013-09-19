@@ -2,6 +2,7 @@ from mongoengine import *
 from Objects.mongoextension import encode_model
 import datetime, json
 
+#Log representation
 class Log(Document):
     logType = StringField(max_length=120, required=True)
     content = StringField(required=True)

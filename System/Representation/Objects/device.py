@@ -3,6 +3,7 @@ from Objects.value import Value
 from Objects.mongoextension import encode_model
 import json
 
+#Device representation
 class Device(Document):
 	name = StringField(max_length=60, required=True)
 	description = StringField(max_length=120, required=True)

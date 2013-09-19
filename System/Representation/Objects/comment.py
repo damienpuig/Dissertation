@@ -3,6 +3,7 @@ from Objects.user import User
 from Objects.mongoextension import encode_model
 import datetime, json
 
+#Comment is an embedded entity in the value object.
 class Comment(EmbeddedDocument):
     content = StringField(required=True)
     author = EmailField(required=True)

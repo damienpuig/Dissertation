@@ -1,13 +1,15 @@
 
       <!-- Feed Entry -->
-      <div class="row" id={{value.id}}>
+      
+      <div class="row" id="{{value.id}}" style="border: 1px solid LightGray; border-radius: 3px; margin-bottom: 5px;">
         <div class="small-3 large-2 columns "><img src="http://www.semageek.com/wp-content/uploads/2011/03/ArduinoUNO_Front.jpg" width="80px" height="80px"></div>
+        <h4>General information</h4>
         <div class="small-9 large-10 columns">
           <p>
             <strong>Value id:</strong>
             {{value.id}}
           </p>
-                    <p>
+          <p>
             <strong>Added at:</strong>
             {{value.date}}
           </p>
@@ -21,7 +23,8 @@
           </ul>
 
           %if value.comments :
-            <h6>{{len(value.comments)}} Comments</h6>
+          <hr>
+          <h4>{{len(value.comments)}} Comments</h4>
 
             %for comment in value.comments:
               <div class="row">
@@ -33,5 +36,37 @@
               </div>
             %end
           %end
+          %if value.location :
+            <hr>
+            <h4>Location</h4>
+              <div class="row">
+                <div class="small-9 large-10 columns">
+                  <p>
+                    <strong>Longitude:</strong>
+                      {{value.location['coordinates'][0]}}
+                  </p>
+                  <p>
+                    <strong>latitude:</strong>
+                      {{value.location['coordinates'][1]}}
+                  </p>
+                </div>
+              </div>
+            %end
+          %if value.qoc :
+            <hr>
+            <h4>Quality of Context</h4>
+              <div class="row">
+                <div class="small-9 large-10 columns">
+                  <p>
+                    <strong>Completeness:</strong>
+                      {{value.qoc.completeness}}
+                  </p>
+                  <p>
+                    <strong>Significance:</strong>
+                      {{value.qoc.significance}}
+                  </p>
+                </div>
+              </div>
+            %end
         </div>
       </div>

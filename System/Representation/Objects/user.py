@@ -2,6 +2,8 @@ from mongoengine import *
 from Objects.mongoextension import encode_model
 import json
 
+#User representation
+#No password inplementation needed in the dissertation.
 class User(Document):
     email = EmailField(required=True)
 

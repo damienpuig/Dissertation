@@ -7,21 +7,32 @@ from bottle.ext.websocket import websocket
 from Objects.params import Params
 from Objects.value import Value
 from gevent import monkey
+
+#patch the threading behaviour to switch 
+#for a thread into another thread.
 monkey.patch_all()
 
+#Service Declaration
+###########################################
 value_s = ValueService('ValueService')
 ps_s = PsService('PsService')
+###########################################
 
 
+#ROUTE /connect
+#Socket connection to redis pubsub
 @route('/connect', apply=[websocket])
 def receive(ws):
     if request.environ.get('wsgi.websocket'):
-        print "test"
 
-
-
-
+        #Switch from a thread into another thread
+        # to check socket entries.
+        # 
+        # Infortunately, this does not work because
+        # redis implementation is BLOCKING on
+        # the listen method (No callback implementation on Redis-py?).
         gevent.joinall([
+            #gevent.spawn(server, ws),
             gevent.spawn(server, ws)
             ])
 
@@ -43,25 +54,24 @@ def receive(ws):
 #         gevent.sleep(0)
 
 
-
+#server delivering, through socket, message coming from
+#redis subscription. 
 def server(ws):
         print "server started"
         channel = Params.specific_channels['system.arduinos']
         ps_s.psubscribe(channel)
 
         while True:
-            print "server"
+            #The notify methos is the listen BLOCKING method.
             for output in ps_s.notify():
 
                 if ps_s.isvalidoutput(output):
                     send(ws, output)
 
 
-
-
-
-
-
+#Since each data are processed using redis subscription pubsub
+#we compute the message and send back to the client.
+#Data are also HTML computed on the fly using bottle template.
 def send(ws, output):
     raw = json.loads(output['data'])
     value = value_s.getbyid(raw['id'])

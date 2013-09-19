@@ -1,16 +1,20 @@
 from bson.objectid import ObjectId
 from mongoengine import *
+from bson.dbref import DBRef
 from types import ModuleType
 from itertools import groupby 
 from datetime import datetime
 import json
 
+#extension for mongoDB to convert an entity into json
 def encode_model(obj):
     if isinstance(obj, (Document, EmbeddedDocument)):
         out = dict(obj._data)
         for k,v in out.items():
             if isinstance(v, ObjectId):
                 out[k] = str(v)
+    elif isinstance(obj, DBRef):
+        out = obj.__repr__()
     elif isinstance(obj, QuerySet):
         out = list(obj)
     elif isinstance(obj, ModuleType):

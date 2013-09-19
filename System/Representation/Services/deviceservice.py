@@ -5,6 +5,12 @@ from Objects.result import Result
 from Services.servicebase import ServiceBase
 from bson.objectid import ObjectId
 
+#Device service
+#
+#Basic implementation of a service executing queries
+#to the mongoDB database.
+#Most of the queries are encapsulation in a Result instance.
+#Most of the queries are logged through ServiceBase.
 class DeviceService(ServiceBase):
 
 	def __init__(self, instancename):
@@ -43,7 +49,6 @@ class DeviceService(ServiceBase):
 		if result.isvalid:
 			self.logit("getbyname performed", result.result.tojson())
 		else:
-			print "ahah"
 			self.logit("getbyname performed with error", result.error)
 		return result
 
@@ -73,11 +78,22 @@ class DeviceService(ServiceBase):
 
 
 	def add(self, name, description, location):
-		newDevice = Device(name=name, description=description, location=location)
-		newDevice.save()
+		def query(n, d, l):
+			newDevice = Device(name=name, description=description, location=location)
+			newDevice.save()
+			return newDevice
 
-		self.logit("add performed", "{0} has been added".format(newDevice.tojson()))
-		return newDevice
+
+		result = Result().safe_execute(query, name, description, location)
+
+		if result.isvalid:
+			self.logit("add performed", "{0} has been added".format(result.result.tojson()))
+		else:
+			self.logit("add performed with error", result.error)
+		return result
+
+
+		return result
 
 	def delete(self, device):
 		device.delete()

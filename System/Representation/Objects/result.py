@@ -2,6 +2,14 @@ from mongoengine import *
 from Objects.mongoextension import encode_model
 import json
 
+#Abstraction of each result coming from the database.
+#The result class encapsulate the queries, execute them, 
+#assignate them in the result property, and give
+#a boolean response.
+#If the value is not valid, the error is also encalsulated.
+#
+#This encalsulation is very useful since the system does not crach
+#on database query, and could be extended on every action needed.
 class Result(object):
 	def __init__(self):
 		self.error = None

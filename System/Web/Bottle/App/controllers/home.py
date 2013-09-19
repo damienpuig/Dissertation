@@ -10,23 +10,25 @@ from base import authenticated
 from bottle import template, request, redirect
 
 
+#Services declaration
+###########################################
 user_s = UserService('UserService')
 log_s = ServiceBase('ServiceBase')
 device_s = DeviceService('DeviceService')
 comment_s = CommentService('CommentService')
 value_s = ValueService('ValueService')
+###########################################
 
+#ROUTE /
 @app.wrap_app.route('/', method='GET')
 @authenticated
 def index():
-	#device12comments()
-	#device21comment()
-	comments('arduino1')
 	log = log_s.last()
 	return template('home/index', message=log.result.content + " :" + log.result.details)
 
 
-
+#Some tests
+###########################################
 def device12comments():
 	user = user_s.getbyemail('damien.puig@gmail.com')
 	device = device_s.getbyname(name='arduino1')
@@ -37,7 +39,7 @@ def device12comments():
 	else:
 		print("DEVICE " + device.result.name + " ALREADY ON MONGODB")
 
-	value = value_s.add(device, 'lum', 40.1, None)
+	value = value_s.add(device, 'lum', 40.1, [40, 30], None, None, None)
 
 	comment1 = Comment(content='pas mal cette value1!', author=user.result.email)
 	comment2 = Comment(content='pas mal cette value2!', author=user.result.email)
@@ -71,7 +73,7 @@ def device21comment():
 	else:
 		print("DEVICE " + device.result.name + " ALREADY ON MONGODB")
 
-	value = device_s.addvalue(device, 'lum', 40.1, None)
+	value = value_s.add(device, 'lum', 40.1, [40, 30], None, None, None)
 
 	comment1 = Comment(content='pas mal cette value1!', author=user.result.email)
 
@@ -85,3 +87,4 @@ def newuser():
 	else:
 		print("USER " + user.result.email + " ALREADY ON MONGODB")
 	return user
+###########################################

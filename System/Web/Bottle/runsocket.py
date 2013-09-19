@@ -8,7 +8,7 @@ from bottle.ext.websocket import websocket
 from mongoengine import *
 
 
-
+#Entry point to start a socket server using bottle
 def main():
 	socketPort = int(os.environ.get("PORT", 8000))
 

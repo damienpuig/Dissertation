@@ -1,21 +1,33 @@
 import sys, os, time, redis, json, datetime, threading
 from mongoengine import *
 
-
 class Listener(threading.Thread):
 
+	#GENERAL INFORMATION: If the iscomand is true, the listener will have a totally different behaviour.
+	#EACH INSTANCE OF LISTENER IS A THREAD.
+	#
+	#COMAND LISTENER (iscomand = True)
+	#The listener will subscribe to the comands.system channel and wait for comands
+	#
+	#GATHERER LISTENER (iscomand = False)
+	#The listener will subscribe to the system.arduino.values (which is a Redis pattern for pubsub accepting every arduino)
+	#and waits for new entries
+	#
+	#Since the program will use two instances, we can shutdown it using a single instance of listener, which is the COMAND LISTENER
 	def __init__(self, iscomand, lock):
               threading.Thread.__init__(self)
               self.initRedis(iscomand)
-              self.initMongoDB()
+              self.initMongoDB(iscomand)
               self.lock = lock
               self.pchannel = Params.specific_channels["system.arduino.values"]
 
+    # We init Redis depending on the Listener Behaviour
 	def initRedis(self, iscomand):
 
 		self.predis = redis.Redis(host='localhost', port=6379)
 		self.sredis = redis.Redis(host='localhost', port=6379).pubsub()
 
+		#Possibility to exit OR restart the program
 		self.comands = {
 		'stop': lambda:sys.exit(0),  
 		'restart':lambda:restart_program()
@@ -23,6 +35,7 @@ class Listener(threading.Thread):
 
 		self.iscomand = iscomand
 
+		#Subscriptions
 		if self.iscomand:
 			self.schannel = Params.specific_channels["comands.system"]
 			self.sredis.psubscribe(self.schannel)
@@ -31,74 +44,112 @@ class Listener(threading.Thread):
 			self.sredis.psubscribe(self.schannel)
 
 
+	#initialisation of mongoDB if GATHERER LISTENER
+	def initMongoDB(self, iscomand):
+		if not self.iscomand:
+			register_connection("default", name='dissertation', host='localhost', port=27017)
+			self.device_s = DeviceService('DeviceService')
+			self.value_s = ValueService('ValueService')
 
-	def initMongoDB(self):
-		register_connection("default", name='dissertation', host='localhost', port=27017)
-		self.device_s = DeviceService('DeviceService')
-		self.value_s = ValueService('ValueService')
-
+	# run method will loop on the redis channel.
+	# The fun thing here is that the listen() method from the redis-py API is BLOCKING, so we
+	# cannot give a callback and we have to wait for a result. Hence, we do not need to declare our own While statement!
 	def run(self):
+		print 'Started Redis on ' + self.schannel
+		for message in self.sredis.listen():
+			self.lockprint('NEW MESSAGE', message)
 
-		while True:
-			print 'Checking Redis on ' + self.schannel
-			#datarcvd = 0
-			for message in self.sredis.listen():
-				self.lockprint('NEW MESSAGE', message)
-				# datarcvd += 1
-				# if datarcvd == 10:
-				# 	print 'PUBLISHING STOP'
-				# 	self.redisinstance.publish(self.channel2, 'stop')
-				# print 'Receiving..'
-				if self.iscomand:
-					self.processComands(message)
-				else:
-					self.processEntry(message)
+			if self.iscomand:
+				self.processComands(message)
+			else:
+				self.processEntry(message)
 
 
-			time.sleep(1)
-
-
-
+	# If a message is found, we process it.
 	def processEntry(self, data):
 
+		#If the message does not contains any data, return.
 		if not ('data' in data):
 			return
 
+		#Working with strings and json can be lead to errors. the processing is (try/catch)ed.
 		try:
+			#isolate the message
 			entry = data['data']
+
 			self.lockprint('ENTRY', str(entry))
 
+			#render a json message, easy to work with.
 			result = json.loads(entry)
-			namedevice = result['nodeId']
 
-			device = self.device_s.getbyname(name=namedevice)
+			#Details of the messages
+			###################################################
+			rawDevice = result['device']
+			rawValue = result['value']
+			###################################################
 
+			#check if the device exists
+			device = self.device_s.getbyname(name=rawDevice['nodeId'])
+
+			#if the device does not exist, we add the device
 			if not device.isvalid:
-				device = self.device_s.add(namedevice, 'this is the node ' + namedevice, [40, 30])
 
-			self.lockprint('DEVICE', str(device.result))
+				#details of the new device
+				###################################################
+				name = rawDevice['nodeId']
+				deviceLocation = [float(rawDevice['location']['longitude']), float(rawDevice['location']['latitude'])]
+				###################################################
 
+
+				#we add the new device
+				device = self.device_s.add(name, 'this is the node ' + name, deviceLocation)
+
+
+			self.lockprint('DEVICE', device.result.tojson())
+
+			#if the result is valid (from old or new device)
 			if device.isvalid:
-				newValue = self.value_s.add(device.result, result['type'], result['value'], None)
 
+				#details of the value
+				###################################################
+				value = rawValue['value']
+				valueType = rawValue['type']
+				valueLocation =  [float(rawValue['location']['longitude']), float(rawValue['location']['latitude'])]
+				completeness = rawValue['qoc']['completeness']
+				significance = rawValue['qoc']['significance']
+				###################################################
+
+				#we add finally add the value
+				newValue = self.value_s.add(device.result, valueType, value, valueLocation, None, completeness, significance)
+
+
+				#Once the device/value have been added, we emit using redis publish
 				self.emit(device.result.name, newValue)
 
 		except Exception, e:
 			self.lockprint('ERROR', e)
 
+	#If a comand is detected, process the comand
 	def processComands(self, data):
 		if data['data'] in self.comands:
 			self.lockprint('Comand found: ' + data['data'])
 			self.comands[data['data']]()
 
+	#Emit the entry in database on the system
 	def emit(self, devicename, entry):
 
 		channel = self.pchannel.format(devicename)
+
+		#entity converted to json
 		payload = entry.tojson()
 
 		self.lockprint('EMIT FROM THREAD {0}, CHANNEL {1}'.format(threading.current_thread(), channel), payload)
+
+		#entity emited
 		self.predis.publish(message=payload, channel=channel)
 
+	# shared locked print utility for several listener instance.
+	# they have to use the same lock.
 	def lockprint(self, prefix, message):
 		self.lock.acquire()
 
@@ -127,18 +178,12 @@ if __name__ == '__main__':
 	lock = threading.Lock()
 
 	comandListener = Listener(True, lock)
-	#comandListener.setDaemon(True)
-		
 	valueListener = Listener(False, lock)
-	#valueListener.setDaemon(True)
 
 	comandListener.start()
 	valueListener.start()
 
 def restart_program():
-    """Restarts the current program.
-    Note: this function does not return. Any cleanup action (like
-    saving data) must be done before calling this function."""
     python = sys.executable
     os.execl(python, python, * sys.argv)
 

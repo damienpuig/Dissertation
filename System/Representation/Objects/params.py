@@ -9,6 +9,10 @@ class Params:
 	"comands": "comands.*"
 	}
 
+	#List of the channels used in the application
+	#Some channels finish by a *, meaning that that are patterns for redis-pubsub
+	#Some channels finish have {0}, meaning that they have to be 
+	#completed by a string, namely the name of the arduino
 	specific_channels = {
 
 	#raw data from all devices of the physical network

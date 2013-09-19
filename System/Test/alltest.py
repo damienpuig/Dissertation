@@ -1,6 +1,9 @@
 import unittest
 from ServicesTest.valueservicetest import ValueServiceTest
 
+#We started to implement a test procedure, but
+#it appeared that we didn't finish it
+#due to lack of time.
 def AllTests():
 
 	suite = unittest.TestSuite()

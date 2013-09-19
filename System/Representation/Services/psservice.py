@@ -3,6 +3,12 @@ from Services.servicebase import ServiceBase
 import redis
 
 
+#Pub Sub service
+#
+#Basic implementation of a service executing publish/subscription
+#on a given channel.
+#psubscribe uses content-based patterns.
+#Most of the queries are logged through ServiceBase.
 class PsService(ServiceBase):
 
 	def __init__(self, instancename):

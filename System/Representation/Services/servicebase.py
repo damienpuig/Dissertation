@@ -2,6 +2,10 @@ from mongoengine import *
 from Objects.result import Result
 from Objects.log import Log
 
+#base of all service
+#
+#the ServiceBase is inherited in every service
+#to log, or retreive the last log emited.
 class ServiceBase():
 	def __init__(self, instancename):
 		self.instancename = instancename

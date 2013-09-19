@@ -6,7 +6,8 @@ from bottle import debug, run, hook, get, CherryPyServer
 from mongoengine import *
 
 
-
+#Entry point to start a web server using bottle
+#The server is a cherryPy server.
 def main():
 	webPort = int(os.environ.get("PORT", 8080))
 

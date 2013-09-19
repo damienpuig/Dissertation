@@ -4,6 +4,12 @@ from Objects.result import Result
 from Services.servicebase import ServiceBase
 from bson.objectid import ObjectId
 
+#User service
+#
+#Basic implementation of a service executing queries
+#to the mongoDB database.
+#Most of the queries are encapsulation in a Result instance.
+#Every query is logged through ServiceBase.
 class UserService(ServiceBase):
 
 	def __init__(self, instancename):

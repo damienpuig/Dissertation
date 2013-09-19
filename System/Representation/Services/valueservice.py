@@ -2,9 +2,16 @@ from mongoengine import *
 from Objects.device import Device
 from Objects.value import Value
 from Objects.result import Result
+from Objects.qoc import QoC
 from Services.servicebase import ServiceBase
 from bson.objectid import ObjectId
 
+#Value service
+#
+#Basic implementation of a service executing queries
+#to the mongoDB database.
+#Most of the queries are encapsulation in a Result instance.
+#Most of the queries are logged through ServiceBase.
 class ValueService(ServiceBase):
 
 	def __init__(self, instancename):
@@ -50,8 +57,11 @@ class ValueService(ServiceBase):
 			self.logit("getbytime performed with error", result.error)
 		return result
 
-	def add(self, device, valuetype, value, comment):
-		newValue = Value(valueType=valuetype, value=value)
+	def add(self, device, valuetype, value, location, comment, completeness, significance):
+		newValue = Value(valueType=valuetype, value=value, location=location)
+
+		if not ((completeness is None) and (significance is None)):
+			newValue.qoc = QoC(completeness=completeness, significance=significance)
 
 		if not (comment is None):
 			newValue.comments = [comment]

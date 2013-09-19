@@ -5,11 +5,14 @@ from Services.servicebase import ServiceBase
 from base import authenticated
 from bottle import template, request, redirect
 
+#Service declaration
+###########################################
 user_s = UserService('UserService')
 log_s = ServiceBase('ServiceBase')
+###########################################
 
 
-
+#ROUTE /me
 @app.wrap_app.route('/me', method='GET')
 @authenticated
 def me():
@@ -18,6 +21,8 @@ def me():
 
     return template('user/me', message="this is the me page", user=currentuser.result)
 
+#ROUTE /new
+#New user, get and post implemented
 @app.wrap_app.route('/new', method=['GET', 'POST'])
 def new():
     if request.method == 'POST':
@@ -30,6 +35,8 @@ def new():
     return template('user/new', message='')
 
 
+#ROUTE /login
+#Login page
 @app.wrap_app.route('/login', method=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -42,13 +49,16 @@ def login():
 
     return template('user/login', message='')
 
+#ROUTE /logout
+#logout the user
 @app.wrap_app.route('/logout', method='GET')
 @authenticated
 def logout():
     request.environ["beaker.session"].delete()
     redirect('/')
 
-
+#ROUTE /deleteall
+#delete all user
 @app.wrap_app.route('/deleteuser', method='GET')
 @authenticated
 def delete():
