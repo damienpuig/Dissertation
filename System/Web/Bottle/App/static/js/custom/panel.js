@@ -50,7 +50,7 @@ this.clearwork = function(){
      self.lpaction = null
    }
 
-  if(self.lpaction != null){
+  if(self.socketaction != null){
     if(self.socketaction.readyState == 1){ 
       self.socketaction.send("STOP")
       self.socketaction.close()
