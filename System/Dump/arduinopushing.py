@@ -45,11 +45,17 @@ class Pusher(object):
 			# Specific channel for the finall message. The channel is patternised
 			channel = Params.specific_channels["physical.arduino.values"].format(dname)
 
+
+
+			print 'inserting on '+ channel+' list, '+message
+
+			self.redisinstance.rpush(channel, message)
+
+
 			print 'Pushing to redis on ' + channel
 
-
 			#Publishing on the given channel
-			self.redisinstance.publish(channel, message)
+			self.redisinstance.publish(channel,  Params.global_comands['physical_new_message'])
 
 			time.sleep(10)
 

@@ -1,4 +1,5 @@
 import sys, os, time, redis, json, datetime, threading
+from rlock import Rlock
 from mongoengine import *
 
 class Listener(threading.Thread):
@@ -14,18 +15,19 @@ class Listener(threading.Thread):
 	#and waits for new entries
 	#
 	#Since the program will use two instances, we can shutdown it using a single instance of listener, which is the COMAND LISTENER
-	def __init__(self, iscomand, lock):
+	def __init__(self, iscomand, tLock):
               threading.Thread.__init__(self)
               self.initRedis(iscomand)
               self.initMongoDB(iscomand)
-              self.lock = lock
+              self.tLock = tLock
               self.pchannel = Params.specific_channels["system.arduino.values"]
 
     # We init Redis depending on the Listener Behaviour
 	def initRedis(self, iscomand):
 
-		self.predis = redis.Redis(host='localhost', port=6379)
+		self.redis = redis.Redis(host='localhost', port=6379)
 		self.sredis = redis.Redis(host='localhost', port=6379).pubsub()
+		self.rLock = Rlock(self.redis)
 
 		#Possibility to exit OR restart the program
 		self.comands = {
@@ -74,13 +76,24 @@ class Listener(threading.Thread):
 
 		#Working with strings and json can be lead to errors. the processing is (try/catch)ed.
 		try:
-			#isolate the message
-			entry = data['data']
+
+
+			self.lockprint('LOOKING FOR LIST ', data['channel'])
+
+			self.rLock.acquire()
+
+			#get the entry associated with the subscription
+			entry = self.redis.lpop(data['channel'])
+
+
+			self.rLock.release()
+
 
 			self.lockprint('ENTRY', str(entry))
 
 			#render a json message, easy to work with.
 			result = json.loads(entry)
+
 
 			#Details of the messages
 			###################################################
@@ -88,8 +101,12 @@ class Listener(threading.Thread):
 			rawValue = result['value']
 			###################################################
 
+
+
 			#check if the device exists
 			device = self.device_s.getbyname(name=rawDevice['nodeId'])
+
+
 
 			#if the device does not exist, we add the device
 			if not device.isvalid:
@@ -146,19 +163,19 @@ class Listener(threading.Thread):
 		self.lockprint('EMIT FROM THREAD {0}, CHANNEL {1}'.format(threading.current_thread(), channel), payload)
 
 		#entity emited
-		self.predis.publish(message=payload, channel=channel)
+		self.redis.publish(message=payload, channel=channel)
 
 	# shared locked print utility for several listener instance.
 	# they have to use the same lock.
 	def lockprint(self, prefix, message):
-		self.lock.acquire()
+		self.tLock.acquire()
 
 		if prefix:
 			print "{0} : {1}".format(prefix, message)
 		else:
 			print message
 
-		self.lock.release()
+		self.tLock.release()
 
 
 
@@ -175,10 +192,10 @@ if __name__ == '__main__':
 	from Objects.device import Device
 	from Objects.value import Value
 
-	lock = threading.Lock()
+	tLock = threading.Lock()
 
-	comandListener = Listener(True, lock)
-	valueListener = Listener(False, lock)
+	comandListener = Listener(True, tLock)
+	valueListener = Listener(False, tLock)
 
 	comandListener.start()
 	valueListener.start()

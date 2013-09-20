@@ -42,3 +42,9 @@ class Params:
 	#comands that act on the system itself
 	"comands.system":"comands.system"
 	}
+
+	#global messaging for rpush lpop pattern, multiple servers
+	global_comands = {
+	#new message
+	"physical_new_message": "NEW"
+	}
