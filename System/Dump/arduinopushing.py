@@ -23,10 +23,10 @@ class Pusher(object):
 
 		while self.check:
 
-			#Get ramdom arduino
+			#Get ramdom arduinos
 			dname = random.choice(self.arduinos)
 
-			#Get a value from its sensor
+			#Get a value from its sensors
 			raw = random.randint(100, 1000)
 
 			#Defines the quality of context of the value
@@ -34,7 +34,7 @@ class Pusher(object):
 			valueLocation = "{\"longitude\": \"40\", \"latitude\": \"30\" }"
 			valueContext = "{\"type\": \"Luminosity\", \"value\": " + str(raw) + ", \"qoc\": "+ quality +", \"location\": "+ valueLocation +"}"
 
-			#Defines the location of the device
+			#Defines the location of the device _ hard coded in that case.
 			deviceLocation = "{\"longitude\": \"40\", \"latitude\": \"30\" }"
 			deviceContext = "{\"nodeId\": \""+ dname +"\", \"location\": "+ deviceLocation +"}"
 
@@ -46,15 +46,15 @@ class Pusher(object):
 			channel = Params.specific_channels["physical.arduino.values"].format(dname)
 
 
-
 			print 'inserting on '+ channel+' list, '+message
 
+			#We push the data on a Redis Key/List.
 			self.redisinstance.rpush(channel, message)
 
 
 			print 'Pushing to redis on ' + channel
 
-			#Publishing on the given channel
+			#Publishing on the given channel for notification
 			self.redisinstance.publish(channel,  Params.global_comands['physical_new_message'])
 
 			time.sleep(10)

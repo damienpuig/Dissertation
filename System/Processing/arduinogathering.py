@@ -80,20 +80,23 @@ class Listener(threading.Thread):
 
 			self.lockprint('LOOKING FOR LIST ', data['channel'])
 
+			#acquire priority to process the message from the Redis Key/List
 			self.rLock.acquire()
 
-			#get the entry associated with the subscription
+			#We gat the entry from Redis using the lpop method
+			#which allows us to get the last saved message
+			#on a given key.
 			entry = self.redis.lpop(data['channel'])
 
-
+			#release priority on the given Redis Key/List
 			self.rLock.release()
 
 
 			self.lockprint('ENTRY', str(entry))
 
+
 			#render a json message, easy to work with.
 			result = json.loads(entry)
-
 
 			#Details of the messages
 			###################################################
@@ -101,22 +104,16 @@ class Listener(threading.Thread):
 			rawValue = result['value']
 			###################################################
 
-
-
 			#check if the device exists
 			device = self.device_s.getbyname(name=rawDevice['nodeId'])
 
-
-
 			#if the device does not exist, we add the device
 			if not device.isvalid:
-
 				#details of the new device
 				###################################################
 				name = rawDevice['nodeId']
 				deviceLocation = [float(rawDevice['location']['longitude']), float(rawDevice['location']['latitude'])]
 				###################################################
-
 
 				#we add the new device
 				device = self.device_s.add(name, 'this is the node ' + name, deviceLocation)
