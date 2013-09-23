@@ -16,6 +16,13 @@ function Panel(){
   this.seconds= ko.observable(time).extend({ numeric: 0 })
   this.channels = ko.observableArray(channels)
   this.selectedchannel = ko.observable()
+
+    this.selectedchannel.subscribe(function(newvalue){
+    self.panelViewModel.stop()
+    self.panelViewModel.connect()
+  })
+
+
   this.connect = function(){
 
     if(self.socketaction != null){
@@ -56,6 +63,7 @@ this.clearwork = function(){
       self.socketaction.close()
     }
   }
+
   }
 
 this.socketify = function(){
@@ -87,7 +95,6 @@ this.socketify = function(){
 
     self.socketaction.onclose = function(evt) {
       self.removeLoader()
-      self.socketaction.close()
     }
 }
 

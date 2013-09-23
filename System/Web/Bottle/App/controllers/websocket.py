@@ -32,26 +32,26 @@ def receive(ws):
         # redis implementation is BLOCKING on
         # the listen method (No callback implementation on Redis-py?).
         gevent.joinall([
-            #gevent.spawn(server, ws),
+            gevent.spawn(client, ws),
             gevent.spawn(server, ws)
             ])
 
-# def client(ws):
-#     while True:
-#         print "client started"
-#         msg = ws.receive()
+def client(ws):
+    while True:
+        print "client started"
+        msg = ws.receive()
 
-#         if msg is not None:
-#             if msg is 'STOP':
-#                 print "client if stop"
-#                 ws.close()
-#                 ps_s.punsubscribe()
-#             else:
-#                 print "client else stop"
-#                 ps_s.punsubscribe()
-#                 ps_s.psubscribe(msg)
+        if msg is not None:
+            if msg is 'STOP':
+                print "client if stop"
+                ws.close()
+                ps_s.punsubscribe()
+            else:
+                print "client else stop"
+                ps_s.punsubscribe()
+                ps_s.psubscribe(msg)
 
-#         gevent.sleep(0)
+        gevent.sleep(0)
 
 
 #server delivering, through socket, message coming from
@@ -63,7 +63,7 @@ def server(ws):
 
         while True:
             #The notify methos is the listen BLOCKING method.
-            for output in ps_s.notify():
+            for output in ps_s.sredis.listen():
 
                 if ps_s.isvalidoutput(output):
                     send(ws, output)

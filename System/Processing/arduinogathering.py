@@ -133,7 +133,7 @@ class Listener(threading.Thread):
 				significance = rawValue['qoc']['significance']
 				###################################################
 
-				#we add finally add the value
+				#we finally add the value
 				newValue = self.value_s.add(device.result, valueType, value, valueLocation, None, completeness, significance)
 
 

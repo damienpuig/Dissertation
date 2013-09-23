@@ -19,6 +19,7 @@ class PsService(ServiceBase):
 		self.pchannel = None
 		self.commands = {}
 
+
 	def subscribe(self, channel):
 		self.schannel = channel
 		self.sredis.subscribe(self.schannel)
@@ -26,10 +27,6 @@ class PsService(ServiceBase):
 	def psubscribe(self, channel):
 		self.schannel = channel
 		self.sredis.psubscribe(self.schannel)
-
-	def publish(self, channel, payload):
-		self.pchannel = channel
-		self.predis.publish(self.pchannel, payload)
 
 	def unsubscribe(self):
 		self.schannel = []
@@ -39,8 +36,9 @@ class PsService(ServiceBase):
 		self.schannel = []
 		self.sredis.punsubscribe(self.schannel)
 
-	def notify(self):
-		return self.sredis.listen()
+	def notify(self, channel, payload):
+		self.pchannel = channel
+		self.predis.publish(self.pchannel, payload)
 
 	def isvalidchannel(self, message):
 		if not ('channel' in message):
