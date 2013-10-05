@@ -1,19 +1,53 @@
-import sys, os, time, redis, random
+import sys, os, time, redis, json, datetime, threading, random
 
 # This class simulates the physical network.
 # Once the instance create, it pushes values on
-class Pusher(object):
+class Pusher(threading.Thread):
 
-	def __init__(self, arduinos=None):
+	def __init__(self, iscomand, arduinos=None):
+		threading.Thread.__init__(self)
 		if arduinos is None:
 			self.arduinos = ["arduino1", "arduino2"]
 		else:
 			self.arduinos = arduinos
 
+				#Possibility to exit OR restart the program
+		self.comands = {
+		'stop': lambda:sys.exit(0),  
+		'restart':lambda:restart_program()
+		}
+
+		self.iscomand = iscomand
+
 
 	#Redis inistialisation, we use the default port.
 	def initRedis(self):
 		self.redisinstance = redis.Redis(host='localhost', port=6379)
+
+		if self.iscomand:
+			self.subscriptionintance = redis.Redis(host='localhost', port=6379).pubsub()
+
+		#If a comand is detected, process the comand
+	def processComands(self, data):
+		if data['data'] in self.comands:
+			self.comands[data['data']]()
+
+
+	def checkcomandforever(self):
+		self.subscriptionintance.subscribe(Params.specific_channels["comands.physical"])
+
+		for message in self.subscriptionintance.listen():
+			self.processComands(message)
+
+
+	def run(self):
+		self.initRedis()
+		print 'Redis connection initialised for thread '
+
+		if self.iscomand:
+			self.checkcomandforever()
+		else:
+			self.pushforever()
 
 
 	def pushforever(self):
@@ -66,15 +100,10 @@ if __name__ == '__main__':
 	
 	from Objects.params import Params
 
-	#Set 4 arduinos
-	instance = Pusher(["arduino1", "arduino2", "arduino3", "arduino4"])
-	print 'System Gathering created'
+	comandListener = Pusher(False, ["arduino1", "arduino2", "arduino3", "arduino4"])
+	arduinoPusher = Pusher(True, ["arduino1", "arduino2", "arduino3", "arduino4"])
 
-
-	instance.initRedis()
-	print 'Redis connection initialised'
-
-	instance.pushforever()
-	print 'Started pushing'
+	comandListener.start()
+	arduinoPusher.start()
 
 

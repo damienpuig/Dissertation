@@ -80,16 +80,18 @@ class Listener(threading.Thread):
 
 			self.lockprint('LOOKING FOR LIST ', data['channel'])
 
-			#acquire priority to process the message from the Redis Key/List
+			#acquire priority to process the message from the Redis Channel/Queue
 			self.rLock.acquire()
+			self.lockprint('LOCK ACQUIRED', threading.current_thread())
 
-			#We gat the entry from Redis using the lpop method
+			#We get the entry from Redis using the lpop method
 			#which allows us to get the last saved message
-			#on a given key.
+			#on a given key, and remove it from the list.
 			entry = self.redis.lpop(data['channel'])
 
 			#release priority on the given Redis Key/List
 			self.rLock.release()
+			self.lockprint('LOCK RELEASED', threading.current_thread())
 
 
 			self.lockprint('ENTRY', str(entry))
@@ -98,7 +100,7 @@ class Listener(threading.Thread):
 			#render a json message, easy to work with.
 			result = json.loads(entry)
 
-			#Details of the messages
+			#Details of the message
 			###################################################
 			rawDevice = result['device']
 			rawValue = result['value']
@@ -143,11 +145,6 @@ class Listener(threading.Thread):
 		except Exception, e:
 			self.lockprint('ERROR', e)
 
-	#If a comand is detected, process the comand
-	def processComands(self, data):
-		if data['data'] in self.comands:
-			self.lockprint('Comand found: ' + data['data'])
-			self.comands[data['data']]()
 
 	#Emit the entry in database on the system
 	def emit(self, devicename, entry):
@@ -161,6 +158,15 @@ class Listener(threading.Thread):
 
 		#entity emited
 		self.redis.publish(message=payload, channel=channel)
+
+
+
+	#If a comand is detected, process the comand
+	def processComands(self, data):
+		if data['data'] in self.comands:
+			self.lockprint('Comand found: ' + data['data'])
+			self.comands[data['data']]()
+
 
 	# shared locked print utility for several listener instance.
 	# they have to use the same lock.

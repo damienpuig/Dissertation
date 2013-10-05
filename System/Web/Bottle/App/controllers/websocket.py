@@ -27,10 +27,6 @@ def receive(ws):
 
         #Switch from a thread into another thread
         # to check socket entries.
-        # 
-        # Infortunately, this does not work because
-        # redis implementation is BLOCKING on
-        # the listen method (No callback implementation on Redis-py?).
         gevent.joinall([
             gevent.spawn(client, ws),
             gevent.spawn(server, ws)
@@ -62,9 +58,7 @@ def server(ws):
         ps_s.psubscribe(channel)
 
         while True:
-            #The notify methos is the listen BLOCKING method.
             for output in ps_s.sredis.listen():
-
                 if ps_s.isvalidoutput(output):
                     send(ws, output)
 

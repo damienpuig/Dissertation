@@ -14,6 +14,7 @@ def main():
 	register_connection("default", name='dissertation', host='localhost', port=27017)
 
 	run(app, reloader=True, host='127.0.0.1', port=webPort, server=CherryPyServer)
+	
 
 	bottle.TEMPLATES.clear()
 
