@@ -1,0 +1,33 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0" is_locked="false">
+    <option name="myName" value="Project Default" />
+    <option name="myLocal" value="false" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <value>
+          <list size="19">
+            <item index="0" class="java.lang.String" itemvalue="System.Representation.Services.valueservice.Objects" />
+            <item index="1" class="java.lang.String" itemvalue="System.Representation.Services.servicebase.*" />
+            <item index="2" class="java.lang.String" itemvalue="System.Representation.Services.userservice.*" />
+            <item index="3" class="java.lang.String" itemvalue="System.Representation.Services.valueservice.*" />
+            <item index="4" class="java.lang.String" itemvalue="System.Representation.Services.psservice.*" />
+            <item index="5" class="java.lang.String" itemvalue="System.Representation.Services.deviceservice.*" />
+            <item index="6" class="java.lang.String" itemvalue="System.Representation.Services.commentservice.*" />
+            <item index="7" class="java.lang.String" itemvalue="System.Test.test_processing.*" />
+            <item index="8" class="java.lang.String" itemvalue="System.Test.test_representation.*" />
+            <item index="9" class="java.lang.String" itemvalue="System.Test.test_storing.*" />
+            <item index="10" class="java.lang.String" itemvalue="System.Web.Bottle.App.controllers.home.Services" />
+            <item index="11" class="java.lang.String" itemvalue="System.Web.Bottle.App.controllers.home.*" />
+            <item index="12" class="java.lang.String" itemvalue="System.Web.Bottle.App.controllers.sensor.*" />
+            <item index="13" class="java.lang.String" itemvalue="System.Web.Bottle.App.controllers.user.*" />
+            <item index="14" class="java.lang.String" itemvalue="System.Web.Bottle.App.controllers.websocket.*" />
+            <item index="15" class="java.lang.String" itemvalue="System.Dump.arduinopushingRMQ.*" />
+            <item index="16" class="java.lang.String" itemvalue="System.Dump.arduinopushing.*" />
+            <item index="17" class="java.lang.String" itemvalue="System.Objects.*" />
+            <item index="18" class="java.lang.String" itemvalue="commentservice.*" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
