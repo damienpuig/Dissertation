@@ -1,6 +1,10 @@
+import datetime
+import json
+
 from mongoengine import *
+
 from Objects.mongoextension import encode_model
-import datetime, json
+
 
 #Log representation
 class Log(Document):
@@ -11,7 +15,7 @@ class Log(Document):
 
     @queryset_manager
     def objects(doc_cls, queryset):
-    	return queryset.order_by('-date')
+        return queryset.order_by('-date')
 
     def tojson(self):
-    	return json.dumps(self, default=encode_model)
+        return json.dumps(self, default=encode_model)

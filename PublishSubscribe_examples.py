@@ -1,41 +1,38 @@
 import redis
 
 #creation of the event manager connection
-self.redisPublisher = redis.Redis(host='localhost', port=6379)
+redisPublisher = redis.Redis(host='localhost', port=6379)
 
 # Creation of the message to send
 message = "this information is coming from arduino1 node"
 
 #send the message on the given channel called "physical.arduinos.arduino1"
-self.redisPublisher.publish("physical.arduinos.arduino1", message)
-
-
-
+redisPublisher.publish("physical.arduinos.arduino1", message)
 
 #creation of the event manager connection for subscription
-self.redisSubscriber = redis.Redis(host='localhost', port=6379).pubsub()
+redisSubscriber = redis.Redis(host='localhost', port=6379).pubsub()
 
 #psubscribe (PATTERN SUBSCRIBE) to given channel "physical.arduinos.*"
-self.redisSubscriber.psubscribe("physical.arduinos.*")
+redisSubscriber.psubscribe("physical.arduinos.*")
 
 #define a callback if a message is received
 def callback(message):
-	print message
+    print message
 
 #give the callback to a asynchronous listener.
-self.redisSubscriber.asyncListen(callback)
-
-
+redisSubscriber.asyncListen(callback)
 
 from contentbus import Bus
+
 
 class Arduino(object):
     def __init__(self, name, val):
         self.name = name
         self.value = val
-        
+
     def __str__(self):
         return "Arduino(%s, %s)" % (self.name, self.val)
+
 
 def print_message_for(name):
     def print_message(msg):
@@ -52,7 +49,7 @@ psService = Bus(client='psService')
 #The first subscription will get every entities that have name="arduino1"
 #the second subscription will get every intities that have a value between 450 and 750
 psService.subscribe(print_message_for('psService'), Arduino, name="arduino1")
-psService.subscribe(print_message_for('psService'), Arduino, value__in_range =(450, 750))
+psService.subscribe(print_message_for('psService'), Arduino, value__in_range=(450, 750))
 
 
 #We publish information

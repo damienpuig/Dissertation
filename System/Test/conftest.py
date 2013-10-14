@@ -1,6 +1,5 @@
 import pytest
 import redis
-from mongoengine import *
 
 
 def _get_client(cls, request=None, **kwargs):
@@ -11,6 +10,7 @@ def _get_client(cls, request=None, **kwargs):
     if request:
         request.addfinalizer(client.flushdb)
     return client
+
 
 @pytest.fixture()
 def r(request, **kwargs):

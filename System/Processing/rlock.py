@@ -1,8 +1,8 @@
 import time
 
-class Rlock:
 
-    def __init__(self, redis, lock_key='Rlock', lock_timeout=5*60):
+class Rlock:
+    def __init__(self, redis, lock_key='Rlock', lock_timeout=5 * 60):
         self.lock_key = lock_key
         self.lock_timeout = lock_timeout
         self.redis = redis

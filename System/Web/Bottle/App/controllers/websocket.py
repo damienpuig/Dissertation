@@ -1,12 +1,16 @@
-from bottle import route, run, template, request
-import json, redis, gevent
+import json
+
+from bottle import route, template, request
+import gevent
+from gevent import monkey
+
 from Services.valueservice import ValueService
 from Services.psservice import PsService
 from bottle.ext.websocket import GeventWebSocketServer
 from bottle.ext.websocket import websocket
 from Objects.params import Params
 from Objects.value import Value
-from gevent import monkey
+
 
 #patch the threading behaviour to switch 
 #for a thread into another thread.
@@ -24,13 +28,13 @@ ps_s = PsService('PsService')
 @route('/connect', apply=[websocket])
 def receive(ws):
     if request.environ.get('wsgi.websocket'):
-
         #Switch from a thread into another thread
         # to check socket entries.
         gevent.joinall([
             gevent.spawn(client, ws),
             gevent.spawn(server, ws)
-            ])
+        ])
+
 
 def client(ws):
     while True:
@@ -53,14 +57,14 @@ def client(ws):
 #server delivering, through socket, message coming from
 #redis subscription. 
 def server(ws):
-        print "server started"
-        channel = Params.specific_channels['system.arduinos']
-        ps_s.psubscribe(channel)
+    print "server started"
+    channel = Params.specific_channels['system.arduinos']
+    ps_s.psubscribe(channel)
 
-        while True:
-            for output in ps_s.sredis.listen():
-                if ps_s.isvalidoutput(output):
-                    send(ws, output)
+    while True:
+        for output in ps_s.sredis.listen():
+            if ps_s.isvalidoutput(output):
+                send(ws, output)
 
 
 #Since each data are processed using redis subscription pubsub
@@ -72,12 +76,12 @@ def send(ws, output):
 
     if not value.isvalid:
         result = {
-        "count": 0
+            "count": 0
         }
     else:
         result = {
-        "data" : template('template/value', value=value.result),
-        "count": 1
+            "data": template('template/value', value=value.result),
+            "count": 1
         }
 
     ws.send(json.dumps(result))
